@@ -55,6 +55,8 @@ Ses İşleme: Web Speech API
 
 Tasarım: Özel CSS + Tailwind CSS uyumluluğu
 
+---------------------------------------------------------------------------------------------------------
+
 DILPANEL
 AI-Powered Professional Language Learning Platform
 
