@@ -139,7 +139,7 @@ def ai_roleplay_chat(request):
             
             try:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel('gemini-2.0-flash-exp')
+                model = genai.GenerativeModel('gemini-2.5-flash')
             except Exception as e:
                 return JsonResponse({
                     'success': False,
@@ -251,7 +251,7 @@ def ai_questions_chat(request):
             
             try:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel('gemini-2.0-flash-exp')
+                model = genai.GenerativeModel('gemini-2.5-flash')
             except Exception as e:
                 return JsonResponse({
                     'success': False,

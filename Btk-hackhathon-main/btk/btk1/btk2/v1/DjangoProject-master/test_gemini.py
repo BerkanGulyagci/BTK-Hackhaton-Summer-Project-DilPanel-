@@ -23,7 +23,7 @@ def test_gemini_api():
     try:
         # Configure Gemini
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
         # Test with a simple prompt
         test_prompt = "Hello! Can you respond with 'Gemini API is working correctly' in English?"
@@ -53,7 +53,7 @@ def test_roleplay_prompt():
     
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
         # Test roleplay prompt
         system_prompt = """You are an English language tutor helping a student practice roleplay conversations. 
