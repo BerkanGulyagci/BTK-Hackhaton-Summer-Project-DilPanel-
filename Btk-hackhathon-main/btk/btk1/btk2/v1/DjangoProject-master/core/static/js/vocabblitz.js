@@ -1,491 +1,414 @@
-// Enhanced VocabBlitz - Bilingual Word Match Game
+// VocabBlitz - Kelime Eşleştirme Oyunu
 
 document.addEventListener("DOMContentLoaded", () => {
-  // DOM referansları
+  // Kelime havuzları
+  const wordPools = {
+    "A1-A2": [
+      { en: "cat", tr: "kedi" },
+      { en: "dog", tr: "köpek" },
+      { en: "house", tr: "ev" },
+      { en: "book", tr: "kitap" },
+      { en: "car", tr: "araba" },
+      { en: "water", tr: "su" },
+      { en: "apple", tr: "elma" },
+      { en: "school", tr: "okul" },
+      { en: "sun", tr: "güneş" },
+      { en: "table", tr: "masa" },
+      { en: "chair", tr: "sandalye" },
+      { en: "pen", tr: "kalem" },
+      { en: "window", tr: "pencere" },
+      { en: "door", tr: "kapı" },
+      { en: "milk", tr: "süt" },
+      { en: "bread", tr: "ekmek" },
+      { en: "tree", tr: "ağaç" },
+      { en: "bird", tr: "kuş" },
+      { en: "fish", tr: "balık" },
+      { en: "flower", tr: "çiçek" }
+    ],
+    "B1-B2": [
+      { en: "challenge", tr: "meydan okuma" },
+      { en: "improve", tr: "geliştirmek" },
+      { en: "solution", tr: "çözüm" },
+      { en: "opinion", tr: "görüş" },
+      { en: "environment", tr: "çevre" },
+      { en: "opportunity", tr: "fırsat" },
+      { en: "responsible", tr: "sorumlu" },
+      { en: "experience", tr: "deneyim" },
+      { en: "decision", tr: "karar" },
+      { en: "support", tr: "destek" },
+      { en: "community", tr: "topluluk" },
+      { en: "increase", tr: "artırmak" },
+      { en: "reduce", tr: "azaltmak" },
+      { en: "require", tr: "gerektirmek" },
+      { en: "suggestion", tr: "öneri" },
+      { en: "achievement", tr: "başarı" },
+      { en: "attend", tr: "katılmak" },
+      { en: "compare", tr: "karşılaştırmak" },
+      { en: "describe", tr: "tanımlamak" },
+      { en: "prepare", tr: "hazırlamak" }
+    ],
+    "C1-C2": [
+      { en: "comprehensive", tr: "kapsamlı" },
+      { en: "subsequently", tr: "sonradan" },
+      { en: "predominantly", tr: "çoğunlukla" },
+      { en: "contemplate", tr: "düşünüp taşınmak" },
+      { en: "perceive", tr: "algılamak" },
+      { en: "convey", tr: "iletmek" },
+      { en: "detrimental", tr: "zararlı" },
+      { en: "inadvertently", tr: "yanlışlıkla" },
+      { en: "meticulous", tr: "titiz" },
+      { en: "notion", tr: "kavram" },
+      { en: "prevalent", tr: "yaygın" },
+      { en: "scrutiny", tr: "inceleme" },
+      { en: "substantiate", tr: "kanıtlamak" },
+      { en: "ubiquitous", tr: "her yerde bulunan" },
+      { en: "vindicate", tr: "aklamak" },
+      { en: "alleviate", tr: "hafifletmek" },
+      { en: "conspicuous", tr: "göze çarpan" },
+      { en: "elaborate", tr: "ayrıntılı" },
+      { en: "facetious", tr: "nükteli" },
+      { en: "meticulous", tr: "titiz" }
+    ]
+  }
+
+  // Oyun durumu
+  let gameState = {
+    level: null,
+    words: [],
+    currentIndex: 0,
+    score: 0,
+    correctAnswers: 0,
+    wrongAnswers: 0,
+    totalQuestions: 10,
+    timeLeft: 0,
+    maxTime: 0,
+    timer: null,
+    canAnswer: true
+  }
+
+  // DOM elementleri
   const levelSelect = document.getElementById("levelSelect")
   const gameSection = document.getElementById("gameSection")
+  const gameOver = document.getElementById("gameOver")
+  const startGameBtn = document.getElementById("startGame")
+  const playAgain = document.getElementById("playAgain")
+  
   const wordDisplay = document.getElementById("wordDisplay")
+  const choicesDiv = document.getElementById("choices")
   const scoreSpan = document.getElementById("score")
   const questionNumSpan = document.getElementById("questionNum")
   const timeSpan = document.getElementById("time")
   const message = document.getElementById("message")
-  const gameOver = document.getElementById("gameOver")
-  const finalScore = document.getElementById("finalScore")
-  const playAgain = document.getElementById("playAgain")
-  const startGameBtn = document.getElementById("startGame")
-  const choicesDiv = document.getElementById("choices")
   const progressFill = document.getElementById("progressFill")
   const timerCircle = document.getElementById("timerCircle")
-  const resultIcon = document.getElementById("resultIcon")
-  const resultTitle = document.getElementById("resultTitle")
+  
+  const finalScore = document.getElementById("finalScore")
   const correctBar = document.getElementById("correctBar")
   const wrongBar = document.getElementById("wrongBar")
   const correctCount = document.getElementById("correctCount")
   const wrongCount = document.getElementById("wrongCount")
+  const resultIcon = document.getElementById("resultIcon")
+  const resultTitle = document.getElementById("resultTitle")
+  const wrongSummary = document.getElementById("wrongSummary")
 
-  const wordPools = {
-    "A1-A2": [
-      { en: "cat", tr: "kedi", pronunciation: "/kæt/" },
-      { en: "dog", tr: "köpek", pronunciation: "/dɔːɡ/" },
-      { en: "house", tr: "ev", pronunciation: "/haʊs/" },
-      { en: "book", tr: "kitap", pronunciation: "/bʊk/" },
-      { en: "car", tr: "araba", pronunciation: "/kɑːr/" },
-      { en: "water", tr: "su", pronunciation: "/ˈwɔːtər/" },
-      { en: "apple", tr: "elma", pronunciation: "/ˈæpəl/" },
-      { en: "school", tr: "okul", pronunciation: "/skuːl/" },
-      { en: "sun", tr: "güneş", pronunciation: "/sʌn/" },
-      { en: "table", tr: "masa", pronunciation: "/ˈteɪbəl/" },
-      { en: "chair", tr: "sandalye", pronunciation: "/tʃer/" },
-      { en: "pen", tr: "kalem", pronunciation: "/pen/" },
-      { en: "window", tr: "pencere", pronunciation: "/ˈwɪndoʊ/" },
-      { en: "door", tr: "kapı", pronunciation: "/dɔːr/" },
-      { en: "milk", tr: "süt", pronunciation: "/mɪlk/" },
-      { en: "bread", tr: "ekmek", pronunciation: "/bred/" },
-      { en: "tree", tr: "ağaç", pronunciation: "/triː/" },
-      { en: "bird", tr: "kuş", pronunciation: "/bɜːrd/" },
-      { en: "fish", tr: "balık", pronunciation: "/fɪʃ/" },
-      { en: "flower", tr: "çiçek", pronunciation: "/ˈflaʊər/" },
-    ],
-    "B1-B2": [
-      { en: "challenge", tr: "meydan okuma", pronunciation: "/ˈtʃælɪndʒ/" },
-      { en: "improve", tr: "geliştirmek", pronunciation: "/ɪmˈpruːv/" },
-      { en: "solution", tr: "çözüm", pronunciation: "/səˈluːʃən/" },
-      { en: "opinion", tr: "görüş", pronunciation: "/əˈpɪnjən/" },
-      { en: "environment", tr: "çevre", pronunciation: "/ɪnˈvaɪrənmənt/" },
-      { en: "opportunity", tr: "fırsat", pronunciation: "/ˌɑːpərˈtuːnəti/" },
-      { en: "responsible", tr: "sorumlu", pronunciation: "/rɪˈspɑːnsəbəl/" },
-      { en: "experience", tr: "deneyim", pronunciation: "/ɪkˈspɪriəns/" },
-      { en: "decision", tr: "karar", pronunciation: "/dɪˈsɪʒən/" },
-      { en: "support", tr: "destek", pronunciation: "/səˈpɔːrt/" },
-      { en: "community", tr: "topluluk", pronunciation: "/kəˈmjuːnəti/" },
-      { en: "increase", tr: "artırmak", pronunciation: "/ɪnˈkriːs/" },
-      { en: "reduce", tr: "azaltmak", pronunciation: "/rɪˈduːs/" },
-      { en: "require", tr: "gerektirmek", pronunciation: "/rɪˈkwaɪər/" },
-      { en: "suggestion", tr: "öneri", pronunciation: "/səˈdʒestʃən/" },
-      { en: "achievement", tr: "başarı", pronunciation: "/əˈtʃiːvmənt/" },
-      { en: "attend", tr: "katılmak", pronunciation: "/əˈtend/" },
-      { en: "compare", tr: "karşılaştırmak", pronunciation: "/kəmˈper/" },
-      { en: "describe", tr: "tanımlamak", pronunciation: "/dɪˈskraɪb/" },
-      { en: "prepare", tr: "hazırlamak", pronunciation: "/prɪˈper/" },
-    ],
-    "C1-C2": [
-      { en: "comprehensive", tr: "kapsamlı", pronunciation: "/ˌkɑːmprɪˈhensɪv/" },
-      { en: "notwithstanding", tr: "-e rağmen", pronunciation: "/ˌnɑːtwɪθˈstændɪŋ/" },
-      { en: "subsequently", tr: "sonradan", pronunciation: "/ˈsʌbsɪkwəntli/" },
-      { en: "predominantly", tr: "çoğunlukla", pronunciation: "/prɪˈdɑːmɪnəntli/" },
-      { en: "contemplate", tr: "düşünüp taşınmak", pronunciation: "/ˈkɑːntəmpleɪt/" },
-      { en: "perceive", tr: "algılamak", pronunciation: "/pərˈsiːv/" },
-      { en: "convey", tr: "iletmek", pronunciation: "/kənˈveɪ/" },
-      { en: "detrimental", tr: "zararlı", pronunciation: "/ˌdetrɪˈmentəl/" },
-      { en: "inadvertently", tr: "yanlışlıkla", pronunciation: "/ˌɪnədˈvɜːrtəntli/" },
-      { en: "meticulous", tr: "titiz", pronunciation: "/məˈtɪkjələs/" },
-      { en: "notion", tr: "kavram", pronunciation: "/ˈnoʊʃən/" },
-      { en: "prevalent", tr: "yaygın", pronunciation: "/ˈprevələnt/" },
-      { en: "scrutiny", tr: "inceleme", pronunciation: "/ˈskruːtəni/" },
-      { en: "substantiate", tr: "kanıtlamak", pronunciation: "/səbˈstænʃieɪt/" },
-      { en: "ubiquitous", tr: "her yerde bulunan", pronunciation: "/juːˈbɪkwɪtəs/" },
-      { en: "vindicate", tr: "aklamak", pronunciation: "/ˈvɪndɪkeɪt/" },
-      { en: "alleviate", tr: "hafifletmek", pronunciation: "/əˈliːvieɪt/" },
-      { en: "conspicuous", tr: "göze çarpan", pronunciation: "/kənˈspɪkjuəs/" },
-      { en: "elaborate", tr: "ayrıntılı", pronunciation: "/ɪˈlæbərət/" },
-      { en: "facetious", tr: "nükteli", pronunciation: "/fəˈsiːʃəs/" },
-    ],
-  }
-
-  let currentLevel = null
-  let currentWords = []
-  let score = 0
-  let questionNum = 1
-  const totalQuestions = 10
-  let time = 0
-  let maxTime = 0
-  let timer = null
-  let currentWord = null
-  let choices = []
-  let canAnswer = true
-  let correctAnswers = 0
-  let wrongAnswers = 0
-  let userAnswers = []
-
-  // Utility functions
-  function shuffle(arr) {
-    return arr.sort(() => Math.random() - 0.5)
+  // Yardımcı fonksiyonlar
+  function shuffle(array) {
+    const newArray = [...array]
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]]
+    }
+    return newArray
   }
 
   function getTimeForLevel(level) {
-    if (level === "A1-A2") return 7
-    if (level === "B1-B2") return 5
-    if (level === "C1-C2") return 4
-    return 5
+    switch(level) {
+      case "A1-A2": return 7
+      case "B1-B2": return 5
+      case "C1-C2": return 4
+      default: return 5
+    }
   }
 
   function updateProgress() {
-    const progress = ((questionNum - 1) / totalQuestions) * 100
-    progressFill.style.width = `${progress}%`
+    const progress = (gameState.currentIndex / gameState.totalQuestions) * 100
+    if (progressFill) progressFill.style.width = `${progress}%`
+    if (questionNumSpan) questionNumSpan.textContent = gameState.currentIndex + 1
   }
 
   function updateTimer() {
-    const progress = time / maxTime
-    const circumference = 2 * Math.PI * 45
-    const offset = circumference * (1 - progress)
-    timerCircle.style.strokeDashoffset = offset
+    if (timerCircle) {
+      const progress = gameState.timeLeft / gameState.maxTime
+      const circumference = 2 * Math.PI * 45
+      const offset = circumference * (1 - progress)
+      timerCircle.style.strokeDashoffset = offset
+    }
   }
 
-  function createParticleEffect(element, type) {
-    const rect = element.getBoundingClientRect()
-    const particles = document.createElement("div")
-    particles.className = "particle-explosion"
-    particles.style.position = "fixed"
-    particles.style.left = rect.left + rect.width / 2 + "px"
-    particles.style.top = rect.top + rect.height / 2 + "px"
-    particles.style.pointerEvents = "none"
-    particles.style.zIndex = "1000"
-
-    const colors = type === "correct" ? ["#10b981", "#34d399", "#6ee7b7"] : ["#ef4444", "#f87171", "#fca5a5"]
-
-    for (let i = 0; i < 12; i++) {
-      const particle = document.createElement("div")
-      particle.style.position = "absolute"
-      particle.style.width = "6px"
-      particle.style.height = "6px"
-      particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]
-      particle.style.borderRadius = "50%"
-      particle.style.animation = `particle-burst 0.6s ease-out forwards`
-      particle.style.animationDelay = Math.random() * 0.1 + "s"
-
-      const angle = (i / 12) * Math.PI * 2
-      const distance = 50 + Math.random() * 30
-      particle.style.setProperty("--dx", Math.cos(angle) * distance + "px")
-      particle.style.setProperty("--dy", Math.sin(angle) * distance + "px")
-
-      particles.appendChild(particle)
-    }
-
-    document.body.appendChild(particles)
-    setTimeout(() => particles.remove(), 600)
-  }
-
-  // Add particle animation CSS
-  const style = document.createElement("style")
-  style.textContent = `
-    @keyframes particle-burst {
-      0% {
-        transform: translate(0, 0) scale(1);
-        opacity: 1;
-      }
-      100% {
-        transform: translate(var(--dx), var(--dy)) scale(0);
-        opacity: 0;
-      }
-    }
-  `
-  document.head.appendChild(style)
-
-  function startGame(level) {
-    currentLevel = level
-    currentWords = shuffle([...wordPools[level]]).slice(0, totalQuestions)
-    score = 0
-    questionNum = 1
-    correctAnswers = 0
-    wrongAnswers = 0
-    userAnswers = []
-
-    // Show game section with animation
-    levelSelect.style.display = "none"
-    gameSection.style.display = "block"
-    gameOver.style.display = "none"
-
-    // Reset UI
-    scoreSpan.textContent = score
-    questionNumSpan.textContent = questionNum
-    document.getElementById("totalQuestions").textContent = totalQuestions
-    message.textContent = ""
-    message.className = "feedback-message"
-
+  function updateUI() {
+    if (scoreSpan) scoreSpan.textContent = gameState.score
+    if (timeSpan) timeSpan.textContent = gameState.timeLeft
     updateProgress()
+    updateTimer()
+  }
+
+  // Oyun fonksiyonları
+  function startGame() {
+    const selectedLevel = document.querySelector('input[name="level"]:checked')?.value
+    if (!selectedLevel) return
+
+    // Oyun durumunu sıfırla
+    gameState = {
+      level: selectedLevel,
+      words: shuffle(wordPools[selectedLevel]).slice(0, 10),
+      currentIndex: 0,
+      score: 0,
+      correctAnswers: 0,
+      wrongAnswers: 0,
+      totalQuestions: 10,
+      timeLeft: 0,
+      maxTime: getTimeForLevel(selectedLevel),
+      timer: null,
+      canAnswer: true
+    }
+
+    // Ekranları değiştir
+    if (levelSelect) levelSelect.style.display = "none"
+    if (gameSection) gameSection.style.display = "block"
+    if (gameOver) gameOver.style.display = "none"
+
+    // İlk soruyu başlat
     nextQuestion()
   }
 
   function nextQuestion() {
-    canAnswer = true
-    message.textContent = ""
-    message.className = "feedback-message"
-
-    if (questionNum > totalQuestions) {
+    if (gameState.currentIndex >= gameState.totalQuestions) {
       endGame()
       return
     }
 
-    currentWord = currentWords[questionNum - 1]
-    wordDisplay.textContent = currentWord.en
+    gameState.canAnswer = true
+    gameState.timeLeft = gameState.maxTime
 
-    // Show pronunciation if available
-    const pronunciationDiv = document.getElementById("wordPronunciation")
-    if (pronunciationDiv && currentWord.pronunciation) {
-      pronunciationDiv.textContent = currentWord.pronunciation
+    // Mevcut kelimeyi al
+    const currentWord = gameState.words[gameState.currentIndex]
+    if (wordDisplay) wordDisplay.textContent = currentWord.en
+
+    // Seçenekleri oluştur
+    createChoices(currentWord)
+
+    // UI'ı güncelle
+    updateUI()
+    if (message) {
+      message.textContent = ""
+      message.className = "feedback-message"
     }
 
-    // Create choices
-    const wrongChoices = shuffle(wordPools[currentLevel].filter((w) => w.tr !== currentWord.tr)).slice(0, 3)
-    choices = shuffle([
-      { text: currentWord.tr, correct: true },
-      ...wrongChoices.map((w) => ({ text: w.tr, correct: false })),
-    ])
-
-    renderChoices()
+    // Timer'ı başlat
     startTimer()
-    updateProgress()
   }
 
-  function renderChoices() {
+  function createChoices(currentWord) {
+    if (!choicesDiv) return
+
+    // Yanlış seçenekleri al
+    const wrongChoices = shuffle(
+      wordPools[gameState.level].filter(word => word.tr !== currentWord.tr)
+    ).slice(0, 3)
+
+    // Tüm seçenekleri karıştır
+    const allChoices = shuffle([
+      { text: currentWord.tr, correct: true },
+      ...wrongChoices.map(word => ({ text: word.tr, correct: false }))
+    ])
+
+    // Seçenekleri oluştur
     choicesDiv.innerHTML = ""
-    choices.forEach((choice, idx) => {
-      const btn = document.createElement("button")
-      btn.className = "choice-btn"
-      btn.textContent = choice.text
-      btn.onclick = () => selectChoice(idx, btn)
-      btn.disabled = !canAnswer
-      choicesDiv.appendChild(btn)
+    allChoices.forEach((choice, index) => {
+      const button = document.createElement("button")
+      button.className = "choice-btn"
+      button.textContent = choice.text
+      button.onclick = () => selectChoice(choice.correct, button, currentWord.tr)
+      choicesDiv.appendChild(button)
     })
   }
 
   function startTimer() {
-    maxTime = getTimeForLevel(currentLevel)
-    time = maxTime
-    timeSpan.textContent = time
-    updateTimer()
+    clearInterval(gameState.timer)
+    gameState.timer = setInterval(() => {
+      gameState.timeLeft--
+      updateUI()
 
-    clearInterval(timer)
-    timer = setInterval(() => {
-      time--
-      timeSpan.textContent = time
-      updateTimer()
-
-      if (time <= 0) {
-        clearInterval(timer)
-        if (canAnswer) {
+      if (gameState.timeLeft <= 0) {
+        clearInterval(gameState.timer)
+        if (gameState.canAnswer) {
           handleTimeout()
         }
       }
     }, 1000)
   }
 
-  function selectChoice(idx, buttonElement) {
-    if (!canAnswer) return
+  function selectChoice(isCorrect, buttonElement, correctAnswer) {
+    if (!gameState.canAnswer) return
 
-    canAnswer = false
-    clearInterval(timer)
+    gameState.canAnswer = false
+    clearInterval(gameState.timer)
 
-    const isCorrect = choices[idx].correct
-    const selectedChoice = choices[idx].text
+    // Tüm butonları devre dışı bırak
+    const buttons = choicesDiv.querySelectorAll(".choice-btn")
+    buttons.forEach(btn => btn.disabled = true)
 
-    // Record answer
-    userAnswers.push({
-      word: currentWord.en,
-      correct: currentWord.tr,
-      selected: selectedChoice,
-      isCorrect: isCorrect,
-    })
-
-    // Update score and counters
     if (isCorrect) {
-      score++
-      correctAnswers++
-      message.textContent = "Correct! Well done!"
-      message.className = "feedback-message correct"
-      createParticleEffect(buttonElement, "correct")
+      gameState.score += 10
+      gameState.correctAnswers++
+      buttonElement.style.backgroundColor = "#4CAF50"
+      buttonElement.style.color = "white"
+      if (message) {
+        message.textContent = "Correct! 🎉"
+        message.className = "feedback-message correct"
+        message.style.color = "#4CAF50"
+      }
     } else {
-      wrongAnswers++
-      message.textContent = `Wrong! The correct answer is: ${currentWord.tr}`
-      message.className = "feedback-message wrong"
-      createParticleEffect(buttonElement, "wrong")
+      gameState.wrongAnswers++
+      buttonElement.style.backgroundColor = "#f44336"
+      buttonElement.style.color = "white"
+      // Doğru cevabı göster
+      buttons.forEach(btn => {
+        if (btn.textContent === correctAnswer) {
+          btn.style.backgroundColor = "#4CAF50"
+          btn.style.color = "white"
+        }
+      })
+      if (message) {
+        message.textContent = `Wrong! Correct answer: ${correctAnswer}`
+        message.className = "feedback-message wrong"
+        message.style.color = "#f44336"
+      }
     }
 
-    // Update UI
-    scoreSpan.textContent = score
+    updateUI()
 
-    // Color the buttons
-    Array.from(choicesDiv.children).forEach((btn, i) => {
-      btn.disabled = true
-      if (choices[i].correct) {
-        btn.classList.add("correct")
-      } else if (i === idx && !choices[i].correct) {
-        btn.classList.add("wrong")
-      }
-    })
-
-    // Move to next question
+    // Sonraki soruya geç
     setTimeout(() => {
-      questionNum++
-      questionNumSpan.textContent = Math.min(questionNum, totalQuestions)
+      gameState.currentIndex++
       nextQuestion()
     }, 1500)
   }
 
   function handleTimeout() {
-    canAnswer = false
-    wrongAnswers++
+    gameState.canAnswer = false
+    gameState.wrongAnswers++
 
-    userAnswers.push({
-      word: currentWord.en,
-      correct: currentWord.tr,
-      selected: null,
-      isCorrect: false,
-    })
+    const correctAnswer = gameState.words[gameState.currentIndex].tr
 
-    message.textContent = `Time's up! The correct answer was: ${currentWord.tr}`
-    message.className = "feedback-message wrong"
-
-    // Highlight correct answer
-    Array.from(choicesDiv.children).forEach((btn, i) => {
+    // Doğru cevabı göster
+    const buttons = choicesDiv.querySelectorAll(".choice-btn")
+    buttons.forEach(btn => {
       btn.disabled = true
-      if (choices[i].correct) {
-        btn.classList.add("correct")
+      if (btn.textContent === correctAnswer) {
+        btn.style.backgroundColor = "#4CAF50"
+        btn.style.color = "white"
       }
     })
 
+    if (message) {
+      message.textContent = `Time's up! Correct answer: ${correctAnswer}`
+      message.className = "feedback-message wrong"
+      message.style.color = "#f44336"
+    }
+
     setTimeout(() => {
-      questionNum++
-      questionNumSpan.textContent = Math.min(questionNum, totalQuestions)
+      gameState.currentIndex++
       nextQuestion()
     }, 1500)
   }
 
   function endGame() {
-    clearInterval(timer)
-    gameSection.style.display = "none"
-    gameOver.style.display = "block"
+    clearInterval(gameState.timer)
 
-    // Calculate performance
-    const accuracy = Math.round((correctAnswers / totalQuestions) * 100)
+    // Ekranları değiştir
+    if (gameSection) gameSection.style.display = "none"
+    if (gameOver) gameOver.style.display = "block"
 
-    // Update result display
-    if (accuracy >= 80) {
-      resultIcon.innerHTML = '<span class="material-icons">emoji_events</span>'
-      resultIcon.style.background = "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
-      resultTitle.textContent = "Excellent Work!"
-    } else if (accuracy >= 60) {
-      resultIcon.innerHTML = '<span class="material-icons">thumb_up</span>'
-      resultIcon.style.background = "linear-gradient(135deg, #10b981 0%, #059669 100%)"
-      resultTitle.textContent = "Good Job!"
-    } else {
-      resultIcon.innerHTML = '<span class="material-icons">school</span>'
-      resultIcon.style.background = "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)"
-      resultTitle.textContent = "Keep Practicing!"
+    // Sonuçları hesapla
+    const accuracy = Math.round((gameState.correctAnswers / gameState.totalQuestions) * 100)
+
+    // Sonuç ikonunu ve başlığını ayarla
+    if (resultIcon && resultTitle) {
+      if (accuracy >= 80) {
+        resultIcon.innerHTML = '<span class="material-icons">emoji_events</span>'
+        resultTitle.textContent = "Excellent Work!"
+      } else if (accuracy >= 60) {
+        resultIcon.innerHTML = '<span class="material-icons">thumb_up</span>'
+        resultTitle.textContent = "Good Job!"
+      } else {
+        resultIcon.innerHTML = '<span class="material-icons">school</span>'
+        resultTitle.textContent = "Keep Practicing!"
+      }
     }
 
-    finalScore.innerHTML = `
-      <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color); margin-bottom: 0.5rem;">
-        ${accuracy}% Accuracy
-      </div>
-      <div>Score: <strong>${score}</strong> out of <strong>${totalQuestions}</strong></div>
-    `
+    // Final skorunu göster
+    if (finalScore) {
+      finalScore.innerHTML = `
+        <div style="font-size: 1.5rem; font-weight: 700; color: #3b82f6; margin-bottom: 0.5rem;">
+          ${accuracy}% Accuracy
+        </div>
+        <div>Score: <strong>${gameState.score}</strong> / ${gameState.totalQuestions * 10}</div>
+      `
+    }
 
-    // Update counters
-    correctCount.textContent = correctAnswers
-    wrongCount.textContent = wrongAnswers
+    // Grafikleri güncelle
+    if (correctCount) correctCount.textContent = gameState.correctAnswers
+    if (wrongCount) wrongCount.textContent = gameState.wrongAnswers
 
-    // Animate performance bars
     setTimeout(() => {
-      const correctHeight = (correctAnswers / totalQuestions) * 100
-      const wrongHeight = (wrongAnswers / totalQuestions) * 100
-      correctBar.style.height = `${correctHeight}%`
-      wrongBar.style.height = `${wrongHeight}%`
+      const correctPercentage = (gameState.correctAnswers / gameState.totalQuestions) * 100
+      const wrongPercentage = (gameState.wrongAnswers / gameState.totalQuestions) * 100
+      
+      if (correctBar) correctBar.style.height = `${correctPercentage}%`
+      if (wrongBar) wrongBar.style.height = `${wrongPercentage}%`
     }, 500)
 
-    // Show wrong answers summary
-    renderWrongSummary()
-
-    // Suggest next level if performance is good
-    if (accuracy >= 70) {
-      let nextLevel = null
-      if (currentLevel === "A1-A2") nextLevel = "B1-B2"
-      else if (currentLevel === "B1-B2") nextLevel = "C1-C2"
-
-      if (nextLevel) {
-        finalScore.innerHTML += `
-          <div style="margin-top: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: var(--radius-lg); border-left: 4px solid var(--success-color);">
-            <strong>🎉 Ready for the next level!</strong><br>
-            <button id="nextLevelBtn" class="primary-button" style="margin-top: 0.5rem;">
-              Try ${nextLevel} Level
-            </button>
+    // Hata özetini göster
+    if (wrongSummary) {
+      if (gameState.wrongAnswers === 0) {
+        wrongSummary.innerHTML = `
+          <div style="text-align: center; color: #4CAF50; font-weight: 600;">
+            🎉 Perfect Score! All answers were correct!
           </div>
         `
-
-        setTimeout(() => {
-          const nextBtn = document.getElementById("nextLevelBtn")
-          if (nextBtn) {
-            nextBtn.onclick = () => {
-              // Update level selection
-              document.querySelector(`input[value="${nextLevel}"]`).checked = true
-              startGame(nextLevel)
-            }
-          }
-        }, 100)
+      } else {
+        wrongSummary.innerHTML = `
+          <h3>Review Your Performance</h3>
+          <p>You got ${gameState.correctAnswers} out of ${gameState.totalQuestions} questions correct!</p>
+        `
       }
     }
   }
 
-  function renderWrongSummary() {
-    const wrongSummary = document.getElementById("wrongSummary")
-    if (!wrongSummary) return
+  function resetGame() {
+    clearInterval(gameState.timer)
+    
+    // Ekranları sıfırla
+    if (levelSelect) levelSelect.style.display = "block"
+    if (gameSection) gameSection.style.display = "none"
+    if (gameOver) gameOver.style.display = "none"
 
-    const wrongAnswers = userAnswers.filter((ans) => !ans.isCorrect)
-
-    if (wrongAnswers.length === 0) {
-      wrongSummary.innerHTML = `
-        <div style="text-align: center; color: var(--success-color); font-weight: 600;">
-          🎉 Perfect Score! All answers were correct!
-        </div>
-      `
-      return
-    }
-
-    let html = "<h3>Review Your Mistakes</h3><ul>"
-    wrongAnswers.forEach((ans, index) => {
-      html += `
-        <li>
-          <div><span class="q">${ans.word}</span></div>
-          <div>Your answer: <span class="y">${ans.selected || "No answer"}</span></div>
-          <div>Correct answer: <span class="a">${ans.correct}</span></div>
-        </li>
-      `
-    })
-    html += "</ul>"
-    wrongSummary.innerHTML = html
+    // Progress bar'ı sıfırla
+    if (progressFill) progressFill.style.width = "0%"
+    if (correctBar) correctBar.style.height = "0%"
+    if (wrongBar) wrongBar.style.height = "0%"
   }
 
-  // Event listeners
+  // Event listener'lar
   if (startGameBtn) {
-    startGameBtn.addEventListener("click", () => {
-      const selectedRadio = document.querySelector('input[name="level"]:checked')
-      if (selectedRadio) {
-        const level = selectedRadio.value
-        startGame(level)
-      }
-    })
+    startGameBtn.addEventListener("click", startGame)
   }
 
   if (playAgain) {
-    playAgain.addEventListener("click", () => {
-      startGame(currentLevel)
-    })
+    playAgain.addEventListener("click", resetGame)
   }
 
-  // Add level selection animations
-  const levelOptions = document.querySelectorAll(".level-option")
-  levelOptions.forEach((option) => {
-    option.addEventListener("mouseenter", () => {
-      option.style.transform = "translateY(-2px)"
-    })
-
-    option.addEventListener("mouseleave", () => {
-      option.style.transform = "translateY(0)"
-    })
-  })
-
-  // Initialize
-  levelSelect.style.display = "block"
-  gameSection.style.display = "none"
-  gameOver.style.display = "none"
+  // Başlangıç durumu
+  resetGame()
 })

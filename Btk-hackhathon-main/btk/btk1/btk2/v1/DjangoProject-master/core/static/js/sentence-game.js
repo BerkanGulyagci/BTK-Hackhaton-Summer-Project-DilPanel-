@@ -1,36 +1,9 @@
-// Cümle Ustası - Sentence Master Game
+// Sentence Game - Cümle Ustası Oyunu
 
 document.addEventListener("DOMContentLoaded", () => {
-  // DOM referansları
-  const sentenceGameSection = document.getElementById("sentenceGameSection")
-  const sentenceLevelSelect = document.getElementById("sentenceLevelSelect")
-  const sentenceGamePlay = document.getElementById("sentenceGamePlay")
-  const sentenceGameOver = document.getElementById("sentenceGameOver")
-  const sentenceScoreSpan = document.getElementById("sentenceScore")
-  const sentenceQuestionNumSpan = document.getElementById("sentenceQuestionNum")
-  const sentenceTimeSpan = document.getElementById("sentenceTime")
-  const sentenceQuestionDiv = document.getElementById("sentenceQuestion")
-  const sentenceChoicesDiv = document.getElementById("sentenceChoices")
-  const sentenceFeedbackDiv = document.getElementById("sentenceFeedback")
-  const sentenceFinalScore = document.getElementById("sentenceFinalScore")
-  const sentencePlayAgain = document.getElementById("sentencePlayAgain")
-  const startSentenceGameBtn = document.getElementById("startSentenceGame")
-
-  const sentenceGameState = {
-    level: null,
-    questions: [],
-    current: 0,
-    score: 0,
-    correct: 0,
-    wrong: 0,
-    timer: null,
-    time: 0,
-    userAnswers: [],
-    canAnswer: true, // Her soruda sıfırla
-  }
-
-  const sentenceQuestionsData = {
-    A2: [
+  // Soru havuzları
+  const questionPools = {
+    "A2": [
       { type: "fill", q: "I ___ a student.", a: "am", choices: ["is", "am", "are", "be"] },
       { type: "fill", q: "She ___ to school every day.", a: "goes", choices: ["go", "goes", "going", "gone"] },
       { type: "fill", q: "They ___ happy.", a: "are", choices: ["is", "am", "are", "be"] },
@@ -40,273 +13,359 @@ document.addEventListener("DOMContentLoaded", () => {
       { type: "fill", q: "My father ___ a doctor.", a: "is", choices: ["is", "are", "am", "be"] },
       { type: "fill", q: "The children ___ playing.", a: "are", choices: ["is", "are", "was", "were"] },
       { type: "fill", q: "I ___ coffee every morning.", a: "drink", choices: ["drink", "drinks", "drinking", "drank"] },
-      { type: "fill", q: "She ___ English well.", a: "speaks", choices: ["speak", "speaks", "speaking", "spoke"] },
+      { type: "fill", q: "She ___ English well.", a: "speaks", choices: ["speak", "speaks", "speaking", "spoke"] }
     ],
-    B1: [
+    "B1": [
       { type: "fill", q: "I ___ to the gym on Mondays.", a: "go", choices: ["go", "goes", "going", "gone"] },
-      {
-        type: "fill",
-        q: "We ___ English for two years.",
-        a: "have studied",
-        choices: ["studied", "have studied", "studying", "study"],
-      },
-      {
-        type: "fill",
-        q: "She ___ coffee.",
-        a: "doesn't like",
-        choices: ["don't like", "doesn't like", "not like", "isn't like"],
-      },
+      { type: "fill", q: "We ___ English for two years.", a: "have studied", choices: ["studied", "have studied", "studying", "study"] },
+      { type: "fill", q: "She ___ coffee.", a: "doesn't like", choices: ["don't like", "doesn't like", "not like", "isn't like"] },
       { type: "fill", q: "They ___ never visited Istanbul.", a: "have", choices: ["has", "have", "had", "having"] },
       { type: "fill", q: "I ___ call you later.", a: "will", choices: ["will", "would", "shall", "should"] },
       { type: "fill", q: "The movie ___ very interesting.", a: "was", choices: ["is", "was", "were", "are"] },
-      {
-        type: "fill",
-        q: "He ___ working here since 2020.",
-        a: "has been",
-        choices: ["is", "was", "has been", "have been"],
-      },
+      { type: "fill", q: "He ___ working here since 2020.", a: "has been", choices: ["is", "was", "has been", "have been"] },
       { type: "fill", q: "We ___ to the party yesterday.", a: "went", choices: ["go", "went", "gone", "going"] },
       { type: "fill", q: "She ___ finish her homework.", a: "must", choices: ["must", "can", "may", "might"] },
-      { type: "fill", q: "I ___ seen this movie before.", a: "have", choices: ["has", "have", "had", "having"] },
+      { type: "fill", q: "I ___ seen this movie before.", a: "have", choices: ["has", "have", "had", "having"] }
     ],
     "B2-C1": [
       { type: "fill", q: "If I ___ more time, I would travel.", a: "had", choices: ["have", "had", "has", "having"] },
-      {
-        type: "fill",
-        q: "She ___ three books so far.",
-        a: "has written",
-        choices: ["wrote", "has written", "writes", "writing"],
-      },
-      {
-        type: "fill",
-        q: "The results ___ announced tomorrow.",
-        a: "will be",
-        choices: ["will", "will be", "are", "is"],
-      },
-      {
-        type: "fill",
-        q: "He ___ to have finished the project.",
-        a: "claims",
-        choices: ["claim", "claims", "claimed", "claiming"],
-      },
-      {
-        type: "fill",
-        q: "They ___ the film yet.",
-        a: "haven't seen",
-        choices: ["didn't see", "haven't seen", "not see", "don't see"],
-      },
-      {
-        type: "fill",
-        q: "The book ___ by millions of people.",
-        a: "has been read",
-        choices: ["read", "was read", "has been read", "is reading"],
-      },
-      {
-        type: "fill",
-        q: "I wish I ___ speak French fluently.",
-        a: "could",
-        choices: ["can", "could", "would", "should"],
-      },
-      {
-        type: "fill",
-        q: "By next year, we ___ living here for 10 years.",
-        a: "will have been",
-        choices: ["will be", "will have been", "are", "have been"],
-      },
-      {
-        type: "fill",
-        q: "The meeting ___ postponed due to bad weather.",
-        a: "was",
-        choices: ["is", "was", "has been", "will be"],
-      },
-      { type: "fill", q: "She suggested that he ___ a doctor.", a: "see", choices: ["sees", "see", "saw", "seeing"] },
-    ],
+      { type: "fill", q: "She ___ three books so far.", a: "has written", choices: ["wrote", "has written", "writes", "writing"] },
+      { type: "fill", q: "The results ___ announced tomorrow.", a: "will be", choices: ["will", "will be", "are", "is"] },
+      { type: "fill", q: "He ___ to have finished the project.", a: "claims", choices: ["claim", "claims", "claimed", "claiming"] },
+      { type: "fill", q: "They ___ the film yet.", a: "haven't seen", choices: ["didn't see", "haven't seen", "not see", "don't see"] },
+      { type: "fill", q: "The book ___ by millions of people.", a: "has been read", choices: ["read", "was read", "has been read", "is reading"] },
+      { type: "fill", q: "I wish I ___ speak French fluently.", a: "could", choices: ["can", "could", "would", "should"] },
+      { type: "fill", q: "By next year, we ___ living here for 10 years.", a: "will have been", choices: ["will be", "will have been", "are", "have been"] },
+      { type: "fill", q: "The meeting ___ postponed due to bad weather.", a: "was", choices: ["is", "was", "has been", "will be"] },
+      { type: "fill", q: "She suggested that he ___ a doctor.", a: "see", choices: ["sees", "see", "saw", "seeing"] }
+    ]
   }
 
-  function shuffleArray(arr) {
-    const newArr = [...arr]
-    for (let i = newArr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[newArr[i], newArr[j]] = [newArr[j], newArr[i]]
-    }
-    return newArr
+  // Oyun durumu
+  let gameState = {
+    level: null,
+    questions: [],
+    currentIndex: 0,
+    score: 0,
+    correctAnswers: 0,
+    wrongAnswers: 0,
+    totalQuestions: 10,
+    timeLeft: 0,
+    maxTime: 0,
+    timer: null,
+    canAnswer: true,
+    userAnswers: []
   }
 
-  function startSentenceGameFlow(level) {
-    sentenceGameState.level = level
-    sentenceGameState.questions = []
-    sentenceGameState.current = 0
-    sentenceGameState.score = 0
-    sentenceGameState.correct = 0
-    sentenceGameState.wrong = 0
-    sentenceGameState.userAnswers = []
-    sentenceGameState.time = 0
-    clearInterval(sentenceGameState.timer)
-    // AI Modu ise placeholder göster
-    if (level === "AI") {
-      sentenceLevelSelect.style.display = "none"
-      sentenceGamePlay.style.display = "none"
-      sentenceGameOver.style.display = "flex"
-      sentenceFinalScore.innerHTML = "AI Modu çok yakında!"
-      return
+  // DOM elementleri
+  const levelSelect = document.getElementById("levelSelect")
+  const gameSection = document.getElementById("gameSection")
+  const gameOver = document.getElementById("gameOver")
+  const startGameBtn = document.getElementById("startGame")
+  const playAgainBtn = document.getElementById("playAgain")
+  
+  const questionText = document.getElementById("questionText")
+  const choicesDiv = document.getElementById("choices")
+  const feedback = document.getElementById("feedback")
+  
+  const questionNumSpan = document.getElementById("questionNum")
+  const scoreSpan = document.getElementById("score")
+  const timeSpan = document.getElementById("time")
+  const progressFill = document.getElementById("progressFill")
+  
+  const finalScore = document.getElementById("finalScore")
+  const correctBar = document.getElementById("correctBar")
+  const wrongBar = document.getElementById("wrongBar")
+  const correctCount = document.getElementById("correctCount")
+  const wrongCount = document.getElementById("wrongCount")
+  const wrongSummary = document.getElementById("wrongSummary")
+
+  // Yardımcı fonksiyonlar
+  function shuffle(array) {
+    const newArray = [...array]
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]]
     }
-    // Soruları seç
-    const pool = sentenceQuestionsData[level] || sentenceQuestionsData["A2"]
-    sentenceGameState.questions = shuffleArray(pool).slice(0, 10)
-    sentenceLevelSelect.style.display = "none"
-    sentenceGamePlay.style.display = "flex"
-    sentenceGameOver.style.display = "none"
-    nextSentenceQuestion()
-    // Zamanlayıcı başlat
-    sentenceGameState.time = 0
-    sentenceTimeSpan.textContent = sentenceGameState.time
-    sentenceGameState.timer = setInterval(() => {
-      sentenceGameState.time++
-      sentenceTimeSpan.textContent = sentenceGameState.time
-    }, 1000)
+    return newArray
   }
 
   function getTimeForLevel(level) {
-    if (level === "A2") return 10
-    if (level === "B1") return 7
-    if (level === "B2-C1") return 5
-    return 7
+    switch(level) {
+      case "A2": return 10
+      case "B1": return 8
+      case "B2-C1": return 6
+      default: return 8
+    }
   }
 
-  function nextSentenceQuestion() {
-    // Her yeni soruda eski timer'ı kesinlikle temizle
-    if (sentenceGameState.timer) {
-      clearInterval(sentenceGameState.timer)
-      sentenceGameState.timer = null
+  function updateUI() {
+    if (questionNumSpan) questionNumSpan.textContent = gameState.currentIndex + 1
+    if (scoreSpan) scoreSpan.textContent = gameState.score
+    if (timeSpan) timeSpan.textContent = gameState.timeLeft
+    
+    // Progress bar güncelle
+    const progress = ((gameState.currentIndex + 1) / gameState.totalQuestions) * 100
+    if (progressFill) progressFill.style.width = `${progress}%`
+  }
+
+  // Oyun fonksiyonları
+  function startGame() {
+    const selectedLevel = document.querySelector('input[name="level"]:checked')?.value
+    if (!selectedLevel) return
+
+    // Oyun durumunu sıfırla
+    gameState = {
+      level: selectedLevel,
+      questions: shuffle(questionPools[selectedLevel] || questionPools["A2"]).slice(0, 10),
+      currentIndex: 0,
+      score: 0,
+      correctAnswers: 0,
+      wrongAnswers: 0,
+      totalQuestions: 10,
+      timeLeft: 0,
+      maxTime: getTimeForLevel(selectedLevel),
+      timer: null,
+      canAnswer: true,
+      userAnswers: []
     }
 
-    if (sentenceGameState.current >= sentenceGameState.questions.length) {
-      endSentenceGame()
+    // Ekranları değiştir
+    if (levelSelect) levelSelect.style.display = "none"
+    if (gameSection) gameSection.style.display = "block"
+    if (gameOver) gameOver.style.display = "none"
+
+    // İlk soruyu başlat
+    nextQuestion()
+  }
+
+  function nextQuestion() {
+    if (gameState.currentIndex >= gameState.totalQuestions) {
+      endGame()
       return
     }
-    const qObj = sentenceGameState.questions[sentenceGameState.current]
-    sentenceQuestionNumSpan.textContent = sentenceGameState.current + 1
-    sentenceScoreSpan.textContent = sentenceGameState.score
-    sentenceFeedbackDiv.textContent = ""
 
-    let time = getTimeForLevel(sentenceGameState.level)
-    sentenceTimeSpan.textContent = time
-    sentenceGameState.canAnswer = true
-    sentenceGameState.timer = setInterval(() => {
-      time--
-      if (time < 0) time = 0
-      sentenceTimeSpan.textContent = time
-      if (time === 0 && sentenceGameState.canAnswer) {
-        sentenceGameState.canAnswer = false
-        clearInterval(sentenceGameState.timer)
-        handleTimeout(qObj)
-      }
-    }, 1000)
+    gameState.canAnswer = true
+    const currentQuestion = gameState.questions[gameState.currentIndex]
 
-    if (["fill"].includes(qObj.type)) {
-      sentenceQuestionDiv.innerHTML = qObj.q
-      sentenceChoicesDiv.innerHTML = ""
-      qObj.choices.forEach((choice) => {
-        const btn = document.createElement("button")
-        btn.className = "sentence-choice-btn"
-        btn.textContent = choice
-        btn.onclick = () => {
-          if (!sentenceGameState.canAnswer) return
-          sentenceGameState.canAnswer = false
-          clearInterval(sentenceGameState.timer)
-          selectSentenceChoice(choice)
-        }
-        sentenceChoicesDiv.appendChild(btn)
+    // Soruyu göster
+    if (questionText) {
+      questionText.innerHTML = currentQuestion.q
+    }
+
+    // Seçenekleri oluştur
+    if (choicesDiv) {
+      choicesDiv.innerHTML = ""
+      currentQuestion.choices.forEach(choice => {
+        const button = document.createElement("button")
+        button.className = "choice-btn"
+        button.textContent = choice
+        button.onclick = () => selectChoice(choice, currentQuestion.a)
+        choicesDiv.appendChild(button)
       })
     }
+
+    // Feedback'i temizle
+    if (feedback) {
+      feedback.textContent = ""
+      feedback.style.color = ""
+    }
+
+    // Timer'ı başlat
+    gameState.timeLeft = gameState.maxTime
+    updateUI()
+    startTimer()
   }
 
-  function handleTimeout(qObj) {
-    sentenceFeedbackDiv.textContent = `Süre bitti! Doğru cevap: ${qObj.a}`
-    sentenceFeedbackDiv.style.color = "#d32f2f"
-    sentenceGameState.userAnswers.push({ q: qObj, user: null, correct: false })
-    sentenceGameState.score -= 2
-    sentenceGameState.wrong++
-    setTimeout(() => {
-      sentenceGameState.current++
-      nextSentenceQuestion()
+  function startTimer() {
+    clearInterval(gameState.timer)
+    gameState.timer = setInterval(() => {
+      gameState.timeLeft--
+      updateUI()
+
+      if (gameState.timeLeft <= 0) {
+        clearInterval(gameState.timer)
+        if (gameState.canAnswer) {
+          handleTimeout()
+        }
+      }
     }, 1000)
   }
 
-  function selectSentenceChoice(choice) {
-    const qObj = sentenceGameState.questions[sentenceGameState.current]
-    let correct = false
-    if (qObj.a === choice) {
-      correct = true
-      sentenceGameState.score += 10
-      sentenceGameState.correct++
-      sentenceFeedbackDiv.textContent = "Doğru!"
-      sentenceFeedbackDiv.style.color = "#388e3c"
-    } else {
-      sentenceGameState.score -= 2
-      sentenceGameState.wrong++
-      sentenceFeedbackDiv.textContent = `Yanlış! Doğru cevap: ${qObj.a}`
-      sentenceFeedbackDiv.style.color = "#d32f2f"
-    }
-    sentenceGameState.userAnswers.push({ q: qObj, user: choice, correct })
-    setTimeout(() => {
-      sentenceGameState.current++
-      nextSentenceQuestion()
-    }, 900)
-  }
+  function selectChoice(selectedChoice, correctAnswer) {
+    if (!gameState.canAnswer) return
 
-  function endSentenceGame() {
-    clearInterval(sentenceGameState.timer)
-    sentenceGamePlay.style.display = "none"
-    sentenceGameOver.style.display = "flex"
-    const accuracy = Math.round((sentenceGameState.correct / sentenceGameState.questions.length) * 100)
-    sentenceFinalScore.innerHTML = `Doğru: <b>${sentenceGameState.correct}</b> / Yanlış: <b>${sentenceGameState.wrong}</b><br>Skor: <b>${sentenceGameState.score}</b><br>Doğruluk: <b>${accuracy}%</b>`
-    // Yanlış cevap özetini göster
-    const summaryDiv = document.getElementById("sentenceSummary")
-    if (summaryDiv) {
-      const wrongs = sentenceGameState.userAnswers.filter((ans) => !ans.correct)
-      if (wrongs.length === 0) {
-        summaryDiv.innerHTML = "<h3>Tebrikler! Tüm sorular doğru 🎉</h3>"
-      } else {
-        let html = "<h3>Yanlış Yaptığın Sorular</h3><ul>"
-        wrongs.forEach((ans, i) => {
-          const qText = ans.q.q
-          const userAnswer = ans.user ?? "Cevap verilmedi"
-          const correctAnswer = ans.q.a
-          html += `
-            <li style="margin-bottom:1em;">
-              <div><strong>Soru ${i + 1}:</strong> ${qText}</div>
-              <div><span style="color:#d32f2f;">Senin cevabın:</span> ${userAnswer}</div>
-              <div><span style="color:#388e3c;">Doğru cevap:</span> ${correctAnswer}</div>
-            </li>`
-        })
-        html += "</ul>"
-        summaryDiv.innerHTML = html
+    gameState.canAnswer = false
+    clearInterval(gameState.timer)
+
+    const isCorrect = selectedChoice === correctAnswer
+
+    // Tüm butonları devre dışı bırak ve renklendir
+    const buttons = choicesDiv.querySelectorAll(".choice-btn")
+    buttons.forEach(btn => {
+      btn.disabled = true
+      if (btn.textContent === correctAnswer) {
+        btn.style.backgroundColor = "#4CAF50"
+        btn.style.color = "white"
+      } else if (btn.textContent === selectedChoice && !isCorrect) {
+        btn.style.backgroundColor = "#f44336"
+        btn.style.color = "white"
+      }
+    })
+
+    if (isCorrect) {
+      gameState.score += 10
+      gameState.correctAnswers++
+      if (feedback) {
+        feedback.textContent = "Correct! 🎉"
+        feedback.style.color = "#4CAF50"
+      }
+    } else {
+      gameState.wrongAnswers++
+      if (feedback) {
+        feedback.textContent = `Wrong! Correct answer: ${correctAnswer}`
+        feedback.style.color = "#f44336"
       }
     }
+
+    // Cevabı kaydet
+    gameState.userAnswers.push({
+      question: gameState.questions[gameState.currentIndex],
+      userAnswer: selectedChoice,
+      isCorrect: isCorrect
+    })
+
+    updateUI()
+
+    // Sonraki soruya geç
+    setTimeout(() => {
+      gameState.currentIndex++
+      nextQuestion()
+    }, 1500)
   }
 
-  // Silver, Gold, Platinum -> A2, B1, B2-C1 eşlemesi
-  function getLevelFromRadio() {
-    if (document.getElementById("glass-a2").checked) return "A2"
-    if (document.getElementById("glass-b1").checked) return "B1"
-    if (document.getElementById("glass-b2c1").checked) return "B2-C1"
-    if (document.getElementById("glass-ai").checked) return "AI"
-    return "A2"
+  function handleTimeout() {
+    gameState.canAnswer = false
+    gameState.wrongAnswers++
+
+    const currentQuestion = gameState.questions[gameState.currentIndex]
+
+    // Doğru cevabı göster
+    const buttons = choicesDiv.querySelectorAll(".choice-btn")
+    buttons.forEach(btn => {
+      btn.disabled = true
+      if (btn.textContent === currentQuestion.a) {
+        btn.style.backgroundColor = "#4CAF50"
+        btn.style.color = "white"
+      }
+    })
+
+    if (feedback) {
+      feedback.textContent = `Time's up! Correct answer: ${currentQuestion.a}`
+      feedback.style.color = "#f44336"
+    }
+
+    // Cevabı kaydet
+    gameState.userAnswers.push({
+      question: currentQuestion,
+      userAnswer: null,
+      isCorrect: false,
+      isTimeout: true
+    })
+
+    setTimeout(() => {
+      gameState.currentIndex++
+      nextQuestion()
+    }, 1500)
   }
 
-  if (startSentenceGameBtn) {
-    startSentenceGameBtn.onclick = () => {
-      const level = getLevelFromRadio()
-      startSentenceGameFlow(level)
+  function endGame() {
+    clearInterval(gameState.timer)
+
+    // Ekranları değiştir
+    if (gameSection) gameSection.style.display = "none"
+    if (gameOver) gameOver.style.display = "block"
+
+    // Sonuçları hesapla
+    const accuracy = Math.round((gameState.correctAnswers / gameState.totalQuestions) * 100)
+
+    // Final skorunu göster
+    if (finalScore) {
+      finalScore.innerHTML = `
+        Correct: <b>${gameState.correctAnswers}</b> / Wrong: <b>${gameState.wrongAnswers}</b><br>
+        Score: <b>${gameState.score}</b><br>
+        Accuracy: <b>${accuracy}%</b>
+      `
     }
+
+    // Grafikleri güncelle
+    if (correctCount) correctCount.textContent = gameState.correctAnswers
+    if (wrongCount) wrongCount.textContent = gameState.wrongAnswers
+
+    setTimeout(() => {
+      const correctPercentage = (gameState.correctAnswers / gameState.totalQuestions) * 100
+      const wrongPercentage = (gameState.wrongAnswers / gameState.totalQuestions) * 100
+      
+      if (correctBar) correctBar.style.height = `${correctPercentage}%`
+      if (wrongBar) wrongBar.style.height = `${wrongPercentage}%`
+    }, 500)
+
+    // Hata özetini göster
+    showSummary()
   }
-  if (sentencePlayAgain) {
-    sentencePlayAgain.onclick = () => {
-      // Sadece ekranları ayarla — oyunu baştan başlatma
-      sentenceLevelSelect.style.display = "flex"
-      sentenceGamePlay.style.display = "none"
-      sentenceGameOver.style.display = "none"
+
+  function showSummary() {
+    if (!wrongSummary) return
+
+    const mistakes = gameState.userAnswers.filter(answer => !answer.isCorrect)
+
+    if (mistakes.length === 0) {
+      wrongSummary.innerHTML = "<h3>🎉 Congratulations! All questions correct!</h3>"
+      return
     }
+
+    let html = "<h3>Review Your Mistakes</h3><ul>"
+    mistakes.forEach((mistake, index) => {
+      const questionText = mistake.question.q
+      const userAnswer = mistake.userAnswer || "No answer"
+      const correctAnswer = mistake.question.a
+
+      html += `
+        <li style="margin-bottom: 1rem; padding: 1rem; border-left: 3px solid #f44336; background: #fafafa;">
+          <div><strong>Question ${index + 1}:</strong> ${questionText}</div>
+          <div><span style="color: #f44336;">Your answer:</span> ${userAnswer}</div>
+          <div><span style="color: #4CAF50;">Correct answer:</span> ${correctAnswer}</div>
+        </li>
+      `
+    })
+    html += "</ul>"
+
+    wrongSummary.innerHTML = html
   }
+
+  function resetGame() {
+    clearInterval(gameState.timer)
+    
+    // Ekranları sıfırla
+    if (levelSelect) levelSelect.style.display = "block"
+    if (gameSection) gameSection.style.display = "none"
+    if (gameOver) gameOver.style.display = "none"
+
+    // Progress bar'ı sıfırla
+    if (progressFill) progressFill.style.width = "0%"
+    if (correctBar) correctBar.style.height = "0%"
+    if (wrongBar) wrongBar.style.height = "0%"
+  }
+
+  // Event listener'lar
+  if (startGameBtn) {
+    startGameBtn.addEventListener("click", startGame)
+  }
+
+  if (playAgainBtn) {
+    playAgainBtn.addEventListener("click", resetGame)
+  }
+
+  // Başlangıç durumu
+  resetGame()
 })
